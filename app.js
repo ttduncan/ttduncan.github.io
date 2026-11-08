@@ -1,150 +1,245 @@
-const statusEl = document.getElementById("status");
+const appView = document.getElementById("appView");
+const navButtons = document.querySelectorAll(".nav-btn");
+const updatedDate = document.getElementById("updatedDate");
+
+let workoutsPromise;
+
+function getViewFromQuery() {
+  const view = new URLSearchParams(window.location.search).get("view");
+  return view === "library" ? "library" : "home";
+}
+
+function setUpdatedDate() {
+  if (!updatedDate) return;
+
+  updatedDate.textContent = new Date().toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
+}
 
 function parseCSV(text) {
   const rows = [];
-  let currentRow = [];
+  let row = [];
   let field = "";
   let inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    const char = text[i];
 
-    if (ch === '"' && inQuotes && text[i + 1] === '"') {
+    if (char === '"' && inQuotes && text[i + 1] === '"') {
       field += '"';
       i++;
-    } else if (ch === '"') {
+    } else if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (ch === "," && !inQuotes) {
-      currentRow.push(field);
+    } else if (char === "," && !inQuotes) {
+      row.push(field);
       field = "";
-    } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-      if (ch === "\r" && text[i + 1] === "\n") i++;
-      currentRow.push(field);
-      if (currentRow.some(value => value.trim() !== "")) {
-        rows.push(currentRow);
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      row.push(field);
+
+      if (row.some(value => value.trim() !== "")) {
+        rows.push(row);
       }
-      currentRow = [];
+
+      row = [];
       field = "";
     } else {
-      field += ch;
+      field += char;
     }
   }
 
-  if (field.length || currentRow.length) {
-    currentRow.push(field);
-    if (currentRow.some(value => value.trim() !== "")) {
-      rows.push(currentRow);
-    }
+  if (field.length || row.length) {
+    row.push(field);
+    if (row.some(value => value.trim() !== "")) rows.push(row);
   }
 
   if (rows.length < 2) return [];
 
   const headers = rows[0].map(header => header.trim());
+
   return rows.slice(1).map(values => {
-    const obj = {};
+    const workout = {};
     headers.forEach((header, index) => {
-      obj[header] = (values[index] || "").trim();
+      workout[header] = (values[index] || "").trim();
     });
-    return obj;
+    return workout;
   });
 }
 
+// Cache the fetch so switching views does not fetch the CSV again.
+function loadWorkouts() {
+  if (!workoutsPromise) {
+    workoutsPromise = fetch("workouts.csv")
+      .then(response => {
+        if (!response.ok) throw new Error("Unable to load workouts.csv");
+        return response.text();
+      })
+      .then(parseCSV)
+      .then(workouts => {
+        if (!workouts.length) throw new Error("No workouts found in workouts.csv");
+        return workouts;
+      })
+      .catch(error => {
+        workoutsPromise = null; // Allow a retry if loading failed.
+        throw error;
+      });
+  }
+
+  return workoutsPromise;
+}
+
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
 function buildWorkoutCard(workout) {
-  const card = document.createElement("article");
-  card.className = "workout-card";
+  const card = createElement("article", "workout-card");
 
-  const meta = document.createElement("div");
-  meta.className = "meta-row";
+  const meta = createElement("div", "meta-row");
+  meta.append(
+    createElement("span", "pill", workout.category || "Workout"),
+    createElement("span", "duration", workout.duration || "25 min")
+  );
 
-  const pill = document.createElement("span");
-  pill.className = "pill";
-  pill.textContent = workout.category || "Workout";
-
-  const duration = document.createElement("span");
-  duration.className = "duration";
-  duration.textContent = workout.duration || "25 min";
-
-  meta.append(pill, duration);
-
-  const title = document.createElement("h2");
-  title.textContent = workout.title || "Workout";
-
-  const summary = document.createElement("p");
-  summary.className = "summary";
-  summary.textContent = workout.summary || "Daily movement session.";
-
-  const equipment = document.createElement("p");
-  equipment.className = "equipment";
-  equipment.textContent = `Equipment: ${workout.equipment || "Bodyweight"}`;
-
-  const label = document.createElement("div");
-  label.className = "section-label";
-  label.textContent = "Exercises";
-
+  const title = createElement("h2", "", workout.title || "Workout");
+  const summary = createElement(
+    "p",
+    "summary",
+    workout.summary || "Daily movement session."
+  );
+  const equipment = createElement(
+    "p",
+    "equipment",
+    `Equipment: ${workout.equipment || "Bodyweight"}`
+  );
+  const label = createElement("div", "section-label", "Exercises");
   const list = document.createElement("ol");
-  const exercises = (workout.exercises || "")
+
+  (workout.exercises || "")
     .split("|")
     .map(item => item.trim())
-    .filter(Boolean);
-
-  exercises.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    list.appendChild(li);
-  });
+    .filter(Boolean)
+    .forEach(exercise => {
+      list.appendChild(createElement("li", "", exercise));
+    });
 
   card.append(meta, title, summary, equipment, label, list);
   return card;
 }
 
-async function loadContent() {
-  try {
-    const response = await fetch("workouts.csv");
-    if (!response.ok) throw new Error("Unable to load workouts.csv");
+function buildHero(eyebrow, title, subtitle) {
+  const hero = createElement("section", "page-hero");
+  hero.append(
+    createElement("p", "eyebrow", eyebrow),
+    createElement("h1", "", title),
+    createElement("p", "subtitle", subtitle)
+  );
+  return hero;
+}
 
-    const csvText = await response.text();
-    const rows = parseCSV(csvText);
+function renderHome(workouts) {
+  const featured = workouts.find(
+    workout => (workout.featured || "").toLowerCase() === "true"
+  );
 
-    if (!rows.length) {
-      throw new Error("No workouts found");
-    }
+  appView.replaceChildren();
 
-    const page = document.body.dataset.page;
-
-    if (page === "home") {
-      const featured = rows.find(
-        row => (row.featured || "").toLowerCase() === "true"
-      );
-      if (!featured) throw new Error("No featured workout found");
-
-      const todayLabel = document.getElementById("todayLabel");
-      todayLabel.textContent = new Date().toLocaleDateString(undefined, {
+  appView.appendChild(
+    buildHero(
+      new Date().toLocaleDateString(undefined, {
         weekday: "short",
         month: "short",
         day: "numeric"
-      }).toUpperCase();
+      }).toUpperCase(),
+      "Workout of the Day",
+      "Small effort, steady progress."
+    )
+  );
 
-      document
-        .getElementById("workoutContainer")
-        .appendChild(buildWorkoutCard(featured));
-    } else {
-      const container = document.getElementById("libraryContainer");
-      const libraryItems = rows.filter(
-        row => (row.featured || "").toLowerCase() !== "true"
-      );
-
-      libraryItems.forEach(workout => {
-        const card = buildWorkoutCard(workout);
-        card.classList.add("library-card");
-        container.appendChild(card);
-      });
-    }
-
-    if (statusEl) statusEl.textContent = "";
-  } catch (error) {
-    console.error(error);
-    if (statusEl) statusEl.textContent = "Unable to load workout data.";
+  if (featured) {
+    appView.appendChild(buildWorkoutCard(featured));
+  } else {
+    appView.appendChild(
+      createElement("p", "subtitle", "No featured workout is marked in workouts.csv.")
+    );
   }
 }
 
-loadContent();
+function renderLibrary(workouts) {
+  const libraryWorkouts = workouts.filter(
+    workout => (workout.featured || "").toLowerCase() !== "true"
+  );
+
+  appView.replaceChildren();
+  appView.appendChild(
+    buildHero(
+      "Workout Library",
+      "Pick your vibe.",
+      "Choose a session that matches your energy."
+    )
+  );
+
+  const cardList = createElement("div", "card-list");
+
+  libraryWorkouts.forEach(workout => {
+    const card = buildWorkoutCard(workout);
+    card.classList.add("library-card");
+    cardList.appendChild(card);
+  });
+
+  appView.appendChild(cardList);
+}
+
+function setActiveView(view) {
+  navButtons.forEach(button => {
+    const isActive = button.dataset.view === view;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+async function renderView(view) {
+  setActiveView(view);
+
+  try {
+    const workouts = await loadWorkouts();
+
+    if (view === "library") {
+      renderLibrary(workouts);
+    } else {
+      renderHome(workouts);
+    }
+  } catch (error) {
+    console.error(error);
+    appView.replaceChildren(
+      buildHero(
+        "Loading error",
+        "Unable to load workouts",
+        "Check that workouts.csv is in the same folder as index.html, then try again."
+      )
+    );
+  }
+}
+
+navButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const view = button.dataset.view;
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", view);
+    window.history.pushState({}, "", url);
+    renderView(view);
+  });
+});
+
+window.addEventListener("popstate", () => {
+  renderView(getViewFromQuery());
+});
+
+setUpdatedDate();
+renderView(getViewFromQuery());
