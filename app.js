@@ -142,8 +142,8 @@ function renderHome(rows) {
       month: "short",
       day: "numeric"
     }).toUpperCase(),
-    "Workout of the Day",
-    "Small effort, steady progress."
+    "WOD",
+    "Today's Workout"
   );
   content.appendChild(hero);
 
@@ -158,8 +158,8 @@ function renderLibrary(rows) {
 
   const hero = renderHero(
     "Workout Library",
-    "Pick your vibe.",
-    "Choose a session that matches your energy."
+    "Previous WODs",
+    "Times are estimated"
   );
   content.appendChild(hero);
 
