@@ -4,30 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1020" />
-    <title>Move — Workout of the Day</title>
+    <title>Move</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="app.js" defer></script>
   </head>
-  <body data-page="home">
+  <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">MOVE</div>
         <nav class="nav" aria-label="Main navigation">
-          <a class="active" href="index.html" aria-current="page">Today</a>
-          <a href="workouts.html">Library</a>
+          <button class="nav-btn active" data-view="home">Today</button>
+          <button class="nav-btn" data-view="library">Library</button>
         </nav>
       </header>
 
-      <main class="page">
-        <section class="hero">
-          <p class="eyebrow" id="todayLabel">Daily Reset</p>
-          <h1>Workout of the Day</h1>
-          <p class="subtitle">Small effort, steady progress.</p>
-          <p id="status" class="status" aria-live="polite">Loading workout…</p>
-        </section>
+      <main id="appView" class="content"></main>
 
-        <section id="workoutContainer" aria-live="polite"></section>
-      </main>
+      <footer class="date-bar">
+        <span>Updated</span>
+        <strong id="updatedDate">—</strong>
+      </footer>
     </div>
+
+    <script src="app.js" defer></script>
   </body>
 </html>
