@@ -4,10 +4,10 @@ const updatedDate = document.getElementById("updatedDate");
 
 const fallbackWorkout = {
   title: "5/10/15",
-  category: "Standard",
-  duration: "1 round",
+  category: "Default",
+  duration: "3 rounds",
   equipment: "Pull-up bar",
-  summary: "Complete 5 Pull Ups, 10 Squats, and 15 Push Ups.",
+  summary: "3-5 rounds of 5/10/15",
   exercises: "5 Pull Ups|10 Squats|15 Push Ups",
   Today: "1"
 };
