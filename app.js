@@ -1,64 +1,60 @@
-const appView = document.getElementById("appView");
-const navButtons = document.querySelectorAll(".nav-btn");
+const statusEl = document.getElementById("status");
 const updatedDate = document.getElementById("updatedDate");
+const content = document.querySelector("main.page, main.content");
+const navigationLinks = document.querySelectorAll(".nav-btn, .nav a");
 
-let workoutsPromise;
-
-function getViewFromQuery() {
-  const view = new URLSearchParams(window.location.search).get("view");
-  return view === "library" ? "library" : "home";
-}
-
-function setUpdatedDate() {
-  if (!updatedDate) return;
-
-  updatedDate.textContent = new Date().toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric"
-  });
-}
+const fallbackWorkout = {
+  title: "5/10/15",
+  category: "Standard",
+  duration: "1 round",
+  equipment: "Pull-up bar",
+  summary: "Complete 5 Pull Ups, 10 Squats, and 15 Push Ups.",
+  exercises: "5 Pull Ups|10 Squats|15 Push Ups",
+  Today: "1"
+};
 
 function parseCSV(text) {
   const rows = [];
-  let row = [];
+  let currentRow = [];
   let field = "";
   let inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
-    const char = text[i];
+    const ch = text[i];
 
-    if (char === '"' && inQuotes && text[i + 1] === '"') {
+    if (ch === '"' && inQuotes && text[i + 1] === '"') {
       field += '"';
       i++;
-    } else if (char === '"') {
+    } else if (ch === '"') {
       inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
-      row.push(field);
+    } else if (ch === "," && !inQuotes) {
+      currentRow.push(field);
       field = "";
-    } else if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && text[i + 1] === "\n") i++;
-      row.push(field);
-
-      if (row.some(value => value.trim() !== "")) {
-        rows.push(row);
+    } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      currentRow.push(field);
+      if (currentRow.some(value => value.trim() !== "")) {
+        rows.push(currentRow);
       }
-
-      row = [];
+      currentRow = [];
       field = "";
     } else {
-      field += char;
+      field += ch;
     }
   }
 
-  if (field.length || row.length) {
-    row.push(field);
-    if (row.some(value => value.trim() !== "")) rows.push(row);
+  if (field.length || currentRow.length) {
+    currentRow.push(field);
+    if (currentRow.some(value => value.trim() !== "")) {
+      rows.push(currentRow);
+    }
   }
 
   if (rows.length < 2) return [];
 
-  const headers = rows[0].map(header => header.trim());
+  const headers = rows[0].map((header, index) =>
+    (index === 0 ? header.replace(/^\uFEFF/, "") : header).trim()
+  );
 
   return rows.slice(1).map(values => {
     const workout = {};
@@ -69,177 +65,198 @@ function parseCSV(text) {
   });
 }
 
-// Cache the fetch so switching views does not fetch the CSV again.
-function loadWorkouts() {
-  if (!workoutsPromise) {
-    workoutsPromise = fetch("workouts.csv")
-      .then(response => {
-        if (!response.ok) throw new Error("Unable to load workouts.csv");
-        return response.text();
-      })
-      .then(parseCSV)
-      .then(workouts => {
-        if (!workouts.length) throw new Error("No workouts found in workouts.csv");
-        return workouts;
-      })
-      .catch(error => {
-        workoutsPromise = null; // Allow a retry if loading failed.
-        throw error;
-      });
-  }
-
-  return workoutsPromise;
-}
-
-function createElement(tag, className, text) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (text !== undefined) element.textContent = text;
-  return element;
-}
-
 function buildWorkoutCard(workout) {
-  const card = createElement("article", "workout-card");
+  const card = document.createElement("article");
+  card.className = "workout-card";
 
-  const meta = createElement("div", "meta-row");
-  meta.append(
-    createElement("span", "pill", workout.category || "Workout"),
-    createElement("span", "duration", workout.duration || "25 min")
-  );
+  const meta = document.createElement("div");
+  meta.className = "meta-row";
 
-  const title = createElement("h2", "", workout.title || "Workout");
-  const summary = createElement(
-    "p",
-    "summary",
-    workout.summary || "Daily movement session."
-  );
-  const equipment = createElement(
-    "p",
-    "equipment",
-    `Equipment: ${workout.equipment || "Bodyweight"}`
-  );
-  const label = createElement("div", "section-label", "Exercises");
+  const pill = document.createElement("span");
+  pill.className = "pill";
+  pill.textContent = workout.category || "Workout";
+
+  const duration = document.createElement("span");
+  duration.className = "duration";
+  duration.textContent = workout.duration || "25 min";
+
+  meta.append(pill, duration);
+
+  const title = document.createElement("h2");
+  title.textContent = workout.title || "Workout";
+
+  const summary = document.createElement("p");
+  summary.className = "summary";
+  summary.textContent = workout.summary || "Daily movement session.";
+
+  const equipment = document.createElement("p");
+  equipment.className = "equipment";
+  equipment.textContent = `Equipment: ${workout.equipment || "Bodyweight"}`;
+
+  const label = document.createElement("div");
+  label.className = "section-label";
+  label.textContent = "Exercises";
+
   const list = document.createElement("ol");
-
-  (workout.exercises || "")
+  const exercises = (workout.exercises || "")
     .split("|")
     .map(item => item.trim())
-    .filter(Boolean)
-    .forEach(exercise => {
-      list.appendChild(createElement("li", "", exercise));
-    });
+    .filter(Boolean);
+
+  exercises.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
 
   card.append(meta, title, summary, equipment, label, list);
   return card;
 }
 
-function buildHero(eyebrow, title, subtitle) {
-  const hero = createElement("section", "page-hero");
-  hero.append(
-    createElement("p", "eyebrow", eyebrow),
-    createElement("h1", "", title),
-    createElement("p", "subtitle", subtitle)
-  );
-  return hero;
+function setUpdatedDate() {
+  if (!updatedDate) return;
+  updatedDate.textContent = new Date().toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
 }
 
-function renderHome(workouts) {
-  const featured = workouts.find(
-    workout => (workout.featured || "").toLowerCase() === "true"
-  );
-
-  appView.replaceChildren();
-
-  appView.appendChild(
-    buildHero(
-      new Date().toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric"
-      }).toUpperCase(),
-      "Workout of the Day",
-      "Small effort, steady progress."
-    )
-  );
-
-  if (featured) {
-    appView.appendChild(buildWorkoutCard(featured));
-  } else {
-    appView.appendChild(
-      createElement("p", "subtitle", "No featured workout is marked in workouts.csv.")
-    );
-  }
+function isTodayWorkout(workout) {
+  return String(workout.Today || workout.today || "").trim() === "1";
 }
 
-function renderLibrary(workouts) {
-  const libraryWorkouts = workouts.filter(
-    workout => (workout.featured || "").toLowerCase() !== "true"
+function renderHero(eyebrow, title, subtitle) {
+  const section = document.createElement("section");
+  section.className = "hero";
+
+  const eyebrowEl = document.createElement("p");
+  eyebrowEl.className = "eyebrow";
+  eyebrowEl.textContent = eyebrow;
+
+  const h1 = document.createElement("h1");
+  h1.textContent = title;
+
+  const subtitleEl = document.createElement("p");
+  subtitleEl.className = "subtitle";
+  subtitleEl.textContent = subtitle;
+
+  section.append(eyebrowEl, h1, subtitleEl);
+  return section;
+}
+
+function renderHome(rows) {
+  if (!content) return;
+
+  content.replaceChildren();
+
+  const hero = renderHero(
+    new Date().toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    }).toUpperCase(),
+    "Workout of the Day",
+    "Small effort, steady progress."
   );
 
-  appView.replaceChildren();
-  appView.appendChild(
-    buildHero(
-      "Workout Library",
-      "Pick your vibe.",
-      "Choose a session that matches your energy."
-    )
-  );
+  content.appendChild(hero);
 
-  const cardList = createElement("div", "card-list");
+  const todayWorkout = rows ? rows.find(isTodayWorkout) || fallbackWorkout : fallbackWorkout;
+  content.appendChild(buildWorkoutCard(todayWorkout));
+}
+
+function renderLibrary(rows) {
+  if (!content) return;
+
+  content.replaceChildren();
+
+  const hero = renderHero(
+    "Workout Library",
+    "Pick your vibe.",
+    "Choose a session that matches your energy."
+  );
+  content.appendChild(hero);
+
+  const list = document.createElement("section");
+  list.className = "card-list";
+
+  const libraryWorkouts = rows
+    ? rows.filter(workout => !isTodayWorkout(workout))
+    : [fallbackWorkout];
 
   libraryWorkouts.forEach(workout => {
     const card = buildWorkoutCard(workout);
     card.classList.add("library-card");
-    cardList.appendChild(card);
+    list.appendChild(card);
   });
 
-  appView.appendChild(cardList);
+  content.appendChild(list);
 }
 
-function setActiveView(view) {
-  navButtons.forEach(button => {
-    const isActive = button.dataset.view === view;
-    button.classList.toggle("active", isActive);
-    button.setAttribute("aria-pressed", String(isActive));
-  });
+function getCurrentView() {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("view");
+  return requested === "library" ? "library" : "home";
 }
 
-async function renderView(view) {
-  setActiveView(view);
-
-  try {
-    const workouts = await loadWorkouts();
-
-    if (view === "library") {
-      renderLibrary(workouts);
-    } else {
-      renderHome(workouts);
+function setActiveNav(view) {
+  navigationLinks.forEach(link => {
+    const active = (link.dataset.view || link.getAttribute("href") || "").includes(view);
+    link.classList.toggle("active", active);
+    if (link.tagName === "A") {
+      link.setAttribute("aria-current", active ? "page" : "false");
     }
+  });
+}
+
+async function loadWorkouts() {
+  try {
+    const response = await fetch("workouts.csv");
+    if (!response.ok) throw new Error(`CSV load failed: ${response.status}`);
+
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+    if (!rows.length) throw new Error("No CSV rows found");
+
+    return rows;
   } catch (error) {
-    console.error(error);
-    appView.replaceChildren(
-      buildHero(
-        "Loading error",
-        "Unable to load workouts",
-        "Check that workouts.csv is in the same folder as index.html, then try again."
-      )
-    );
+    console.warn("Using fallback workout:", error);
+    return null;
   }
 }
 
-navButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    const view = button.dataset.view;
-    const url = new URL(window.location.href);
-    url.searchParams.set("view", view);
-    window.history.pushState({}, "", url);
+async function renderView(view) {
+  const rows = await loadWorkouts();
+
+  setActiveNav(view);
+
+  if (view === "library") {
+    renderLibrary(rows);
+  } else {
+    renderHome(rows);
+  }
+
+  if (statusEl) {
+    statusEl.textContent = rows ? "" : "Showing the standard 5/10/15 workout.";
+  }
+}
+
+navigationLinks.forEach(link => {
+  link.addEventListener("click", event => {
+    const view = link.dataset.view || (link.getAttribute("href") || "").includes("workouts") ? "library" : "home";
+
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set("view", view);
+    window.history.pushState({}, "", newUrl);
+    event.preventDefault();
     renderView(view);
   });
 });
 
 window.addEventListener("popstate", () => {
-  renderView(getViewFromQuery());
+  renderView(getCurrentView());
 });
 
 setUpdatedDate();
-renderView(getViewFromQuery());
+renderView(getCurrentView());
