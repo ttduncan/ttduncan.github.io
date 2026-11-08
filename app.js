@@ -244,7 +244,8 @@ async function renderView(view) {
 
 navigationLinks.forEach(link => {
   link.addEventListener("click", event => {
-    const view = link.dataset.view || (link.getAttribute("href") || "").includes("workouts") ? "library" : "home";
+    const view = link.dataset.view ||
+  ((link.getAttribute("href") || "").includes("workouts") ? "library" : "home");
 
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set("view", view);
