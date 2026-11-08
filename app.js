@@ -50,4 +50,101 @@ function parseCSV(text) {
 }
 
 function buildWorkoutCard(workout) {
-  const card = document.create
+  const card = document.createElement("article");
+  card.className = "workout-card";
+
+  const meta = document.createElement("div");
+  meta.className = "meta-row";
+
+  const pill = document.createElement("span");
+  pill.className = "pill";
+  pill.textContent = workout.category || "Workout";
+
+  const duration = document.createElement("span");
+  duration.className = "duration";
+  duration.textContent = workout.duration || "25 min";
+
+  meta.append(pill, duration);
+
+  const title = document.createElement("h2");
+  title.textContent = workout.title || "Workout";
+
+  const summary = document.createElement("p");
+  summary.className = "summary";
+  summary.textContent = workout.summary || "Daily movement session.";
+
+  const equipment = document.createElement("p");
+  equipment.className = "equipment";
+  equipment.textContent = `Equipment: ${workout.equipment || "Bodyweight"}`;
+
+  const label = document.createElement("div");
+  label.className = "section-label";
+  label.textContent = "Exercises";
+
+  const list = document.createElement("ol");
+  const exercises = (workout.exercises || "")
+    .split("|")
+    .map(item => item.trim())
+    .filter(Boolean);
+
+  exercises.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+
+  card.append(meta, title, summary, equipment, label, list);
+  return card;
+}
+
+async function loadContent() {
+  try {
+    const response = await fetch("workouts.csv");
+    if (!response.ok) throw new Error("Unable to load workouts.csv");
+
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+
+    if (!rows.length) {
+      throw new Error("No workouts found");
+    }
+
+    const page = document.body.dataset.page;
+
+    if (page === "home") {
+      const featured = rows.find(
+        row => (row.featured || "").toLowerCase() === "true"
+      );
+      if (!featured) throw new Error("No featured workout found");
+
+      const todayLabel = document.getElementById("todayLabel");
+      todayLabel.textContent = new Date().toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      }).toUpperCase();
+
+      document
+        .getElementById("workoutContainer")
+        .appendChild(buildWorkoutCard(featured));
+    } else {
+      const container = document.getElementById("libraryContainer");
+      const libraryItems = rows.filter(
+        row => (row.featured || "").toLowerCase() !== "true"
+      );
+
+      libraryItems.forEach(workout => {
+        const card = buildWorkoutCard(workout);
+        card.classList.add("library-card");
+        container.appendChild(card);
+      });
+    }
+
+    if (statusEl) statusEl.textContent = "";
+  } catch (error) {
+    console.error(error);
+    if (statusEl) statusEl.textContent = "Unable to load workout data.";
+  }
+}
+
+loadContent();
