@@ -12,12 +12,20 @@
       <header class="topbar">
         <div class="brand">MOVE</div>
         <nav class="nav" aria-label="Main navigation">
-          <button class="nav-btn active" data-view="home">Today</button>
-          <button class="nav-btn" data-view="library">Library</button>
+          <button class="nav-btn active" type="button">Today</button>
+          <button class="nav-btn" type="button">Library</button>
         </nav>
       </header>
 
-      <main id="appView" class="content"></main>
+      <main class="content">
+        <section class="page-hero">
+          <p class="eyebrow" id="todayLabel">Daily Reset</p>
+          <h1>Workout of the Day</h1>
+          <p class="subtitle">Small effort, steady progress.</p>
+        </section>
+
+        <section id="workoutContainer" aria-live="polite"></section>
+      </main>
 
       <footer class="date-bar">
         <span>Updated</span>
