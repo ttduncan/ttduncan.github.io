@@ -1,7 +1,6 @@
-const statusEl = document.getElementById("status");
+const content = document.querySelector("main.content");
+const navButtons = document.querySelectorAll(".nav-btn");
 const updatedDate = document.getElementById("updatedDate");
-const content = document.querySelector("main.page, main.content");
-const navigationLinks = document.querySelectorAll(".nav-btn, .nav a");
 
 const fallbackWorkout = {
   title: "5/10/15",
@@ -33,9 +32,7 @@ function parseCSV(text) {
     } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
       if (ch === "\r" && text[i + 1] === "\n") i++;
       currentRow.push(field);
-      if (currentRow.some(value => value.trim() !== "")) {
-        rows.push(currentRow);
-      }
+      if (currentRow.some(value => value.trim() !== "")) rows.push(currentRow);
       currentRow = [];
       field = "";
     } else {
@@ -45,9 +42,7 @@ function parseCSV(text) {
 
   if (field.length || currentRow.length) {
     currentRow.push(field);
-    if (currentRow.some(value => value.trim() !== "")) {
-      rows.push(currentRow);
-    }
+    if (currentRow.some(value => value.trim() !== "")) rows.push(currentRow);
   }
 
   if (rows.length < 2) return [];
@@ -113,22 +108,9 @@ function buildWorkoutCard(workout) {
   return card;
 }
 
-function setUpdatedDate() {
-  if (!updatedDate) return;
-  updatedDate.textContent = new Date().toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric"
-  });
-}
-
-function isTodayWorkout(workout) {
-  return String(workout.Today || workout.today || "").trim() === "1";
-}
-
 function renderHero(eyebrow, title, subtitle) {
   const section = document.createElement("section");
-  section.className = "hero";
+  section.className = "page-hero";
 
   const eyebrowEl = document.createElement("p");
   eyebrowEl.className = "eyebrow";
@@ -145,6 +127,10 @@ function renderHero(eyebrow, title, subtitle) {
   return section;
 }
 
+function isTodayWorkout(workout) {
+  return String(workout.Today || workout.today || "").trim() === "1";
+}
+
 function renderHome(rows) {
   if (!content) return;
 
@@ -159,7 +145,6 @@ function renderHome(rows) {
     "Workout of the Day",
     "Small effort, steady progress."
   );
-
   content.appendChild(hero);
 
   const todayWorkout = rows ? rows.find(isTodayWorkout) || fallbackWorkout : fallbackWorkout;
@@ -178,14 +163,12 @@ function renderLibrary(rows) {
   );
   content.appendChild(hero);
 
-  const list = document.createElement("section");
+  const list = document.createElement("div");
   list.className = "card-list";
 
-  const libraryWorkouts = rows
-    ? rows.filter(workout => !isTodayWorkout(workout))
-    : [fallbackWorkout];
+  const workoutList = rows ? rows.filter(workout => !isTodayWorkout(workout)) : [fallbackWorkout];
 
-  libraryWorkouts.forEach(workout => {
+  workoutList.forEach(workout => {
     const card = buildWorkoutCard(workout);
     card.classList.add("library-card");
     list.appendChild(card);
@@ -194,36 +177,32 @@ function renderLibrary(rows) {
   content.appendChild(list);
 }
 
-function getCurrentView() {
-  const params = new URLSearchParams(window.location.search);
-  const requested = params.get("view");
-  return requested === "library" ? "library" : "home";
-}
-
-function setActiveNav(view) {
-  navigationLinks.forEach(link => {
-    const active = (link.dataset.view || link.getAttribute("href") || "").includes(view);
-    link.classList.toggle("active", active);
-    if (link.tagName === "A") {
-      link.setAttribute("aria-current", active ? "page" : "false");
-    }
-  });
-}
-
 async function loadWorkouts() {
   try {
     const response = await fetch("workouts.csv");
-    if (!response.ok) throw new Error(`CSV load failed: ${response.status}`);
+    if (!response.ok) throw new Error("CSV load failed");
 
     const csvText = await response.text();
     const rows = parseCSV(csvText);
-    if (!rows.length) throw new Error("No CSV rows found");
+    if (!rows.length) throw new Error("No workouts found");
 
     return rows;
   } catch (error) {
     console.warn("Using fallback workout:", error);
     return null;
   }
+}
+
+function currentView() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("view") === "library" ? "library" : "home";
+}
+
+function setActiveNav(view) {
+  navButtons.forEach(button => {
+    const active = button.dataset.view === view;
+    button.classList.toggle("active", active);
+  });
 }
 
 async function renderView(view) {
@@ -236,28 +215,28 @@ async function renderView(view) {
   } else {
     renderHome(rows);
   }
-
-  if (statusEl) {
-    statusEl.textContent = rows ? "" : "Showing the standard 5/10/15 workout.";
-  }
 }
 
-navigationLinks.forEach(link => {
-  link.addEventListener("click", event => {
-    const view = link.dataset.view ||
-  ((link.getAttribute("href") || "").includes("workouts") ? "library" : "home");
-
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set("view", view);
-    window.history.pushState({}, "", newUrl);
-    event.preventDefault();
+navButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const view = button.dataset.view;
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", view);
+    window.history.pushState({}, "", url);
     renderView(view);
   });
 });
 
 window.addEventListener("popstate", () => {
-  renderView(getCurrentView());
+  renderView(currentView());
 });
 
-setUpdatedDate();
-renderView(getCurrentView());
+if (updatedDate) {
+  updatedDate.textContent = new Date().toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
+}
+
+renderView(currentView());
