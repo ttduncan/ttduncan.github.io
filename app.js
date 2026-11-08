@@ -158,7 +158,7 @@ function renderLibrary(rows) {
 
   const hero = renderHero(
     "Workout Library",
-    "Previous WODs",
+    "Alternate WODs",
     "Times are estimated"
   );
   content.appendChild(hero);
