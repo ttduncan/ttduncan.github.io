@@ -1,5 +1,4 @@
-id,title,category,duration,equipment,summary,exercises,featured
-1,Full-Body Reset,Strength,25 min,Dumbbells,"A balanced session to build strength and get your energy up.","Goblet squats — 3 × 10|Dumbbell rows — 3 × 10 each side|Glute bridges — 3 × 12|Plank — 3 × 30 sec",true
-2,Quick Cardio Burst,Cardio,20 min,None,"A short bodyweight session to raise your heart rate.","March in place — 2 min|Squat to reach — 3 × 12|Step-back lunges — 3 × 10 each side|Fast feet — 4 × 20 sec",false
-3,Easy Mobility Flow,Mobility,15 min,Yoga mat,"Gentle movement to loosen up and reset.","Cat-cow — 8 reps|World’s greatest stretch — 5 each side|Hip bridges — 2 × 12|Child’s pose — 60 sec",false
-4,Upper-Body Basics,Strength,30 min,Dumbbells,"A simple upper-body workout for pushing and pulling strength.","Dumbbell floor press — 3 × 10|One-arm rows — 3 × 10 each side|Overhead press — 3 × 8|Dead bug — 3 × 10 each side",false
+id,title,category,duration,equipment,summary,exercises,Today
+1,The Bear,Full Body,30 min,Barbell and Bumper Plates,"Male - 25, Female - 10-15, Youth - dumbells or just bar","3-5 sets of 3-5 reps: Deadlift to Clean to Front Squat/Thruster to Back Squat",0
+2,Five Ten Fifteen,Warmup,20 min,None,"Short Bodyweight Workout","3-5 sets: 5 Pull Ups | 10 Squats | 15 Push Ups",1
+3,2,Alternate Five Ten Fifteen,Warmup,20 min,None,"Short Bodyweight Workout","3-5 sets: 5 Leg Lifts (hanging or laying) | 10 Dips | 15 Step Ups",0
