@@ -4,28 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1020" />
-    <title>Family Fitness</title>
+    <title>Move</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand">Daily Workout</div>
+        <div class="brand">MOVE</div>
         <nav class="nav" aria-label="Main navigation">
           <button class="nav-btn active" type="button" data-view="home">Today</button>
           <button class="nav-btn" type="button" data-view="library">Library</button>
         </nav>
       </header>
 
-      <main class="content">
-        <section class="page-hero">
-          <p class="eyebrow" id="todayLabel">Daily Reset</p>
-          <h1>Workout of the Day</h1>
-          <p class="subtitle">Small effort, steady progress.</p>
-        </section>
-
-        <section id="workoutContainer" aria-live="polite"></section>
-      </main>
+      <main id="appView" class="content"></main>
 
       <footer class="date-bar">
         <span>Updated</span>
