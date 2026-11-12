@@ -126,7 +126,7 @@ function buildWorkoutCard(workout) {
   const summary = createElement(
     "p",
     "summary",
-    workout.summary || "Daily movement session."
+    workout.summary || "Workout."
   );
   const equipment = createElement(
     "p",
@@ -192,7 +192,7 @@ function renderHome(workouts) {
         day: "numeric"
       }).toUpperCase(),
       "Workout of the Day",
-      selected.Day === "0" ? "Everyday Workout" : "Small effort, steady progress."
+      selected.Day === "0" ? "Everyday Workout" : "Deliberate Reps, No Kipping"
     )
   );
 
@@ -206,8 +206,8 @@ function renderLibrary(workouts) {
   appView.appendChild(
     buildHero(
       "Workout Library",
-      "Pick your vibe.",
-      "All scheduled workouts are listed here, including invalid-day entries."
+      "Full list of workouts",
+      "Adjust for fatigue and daily focus."
     )
   );
 
