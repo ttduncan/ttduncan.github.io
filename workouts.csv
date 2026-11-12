@@ -1,5 +1,8 @@
 id,title,category,duration,equipment,summary,exercises,Day
-1,The Bear,Full Body,30 min,Barbell and Bumper Plates,"Male - 25lbs, Female - 10-15lbs, Youth - dumbells or just bar | 3-5 sets of 3-5 reps","Deadlift to Clean to Front Squat/Thruster to Back Squat",3
-2,Five-Ten-Fifteen,Warmup,20 min,Pull Up Bar,"3-5 Sets Each","5 Pull Ups | 10 Squats | 15 Push Ups",0
-3,Alternate Five-Ten-Fifteen,Warmup,20 min,None,"3-5 Sets Each","5 Leg Lifts (hanging or laying) | 10 Dips | 15 Step Ups",8
-3,Chest,Muscle Group,20 min,Dumbells,"3-5 Sets Each. Finish with Pushups to Failure","10 Chest Press | 10 Chest Fly or Iron Cross | 10 Incline Chest Fly",1
+1,The Bear,Full Body,30 min,Barbell and Bumper Plates,"Male - 25lbs | Female - 10-15lbs | Youth - dumbells or just bar | 3-5 sets of 3-5 reps","Deadlift to Clean to Front Squat/Thruster to Back Squat",5
+2,Five-Ten-Fifteen,Warmup,20 min,Pull Up Bar,"3-5 Sets Each","5 Pull Ups | 10 Squats | 15 Push Ups",5
+3,Alternate Five-Ten-Fifteen,Warmup,20 min,None,"3-5 Sets Each","5 Leg Lifts (hanging or laying) | 10 Dips | 15 Step Ups",6
+4,Chest,Muscle Group,20 min,Dumbells,"3-5 Sets Each. Finish with Pushups to Failure","10 Chest Press | 10 Chest Fly or Iron Cross | 10 Incline Chest Fly",1
+5,Back,Muscle Group,20 min,Dumbells | Pull Up Bar,"3-5 Sets Each. Pull Ups Between Each Set","10 Row | 10 Back Fly | 10 Dumbell Row",2
+6,Tricepa,Muscle Group,20 min,Dumbells,"3-5 Sets Each. Dips Between Sets","10 Overhead Tricep Extension | 10 Tricep Pull Down | 10 Lateral Tricep Extension",3
+7,Biceps,Muscle Group,20 min,Dumbells | Barbell,"3-5 Sets Each. Pull Ups between Sets","10 Reverse Grip Curl | 10 Dumbell Curls | 10 Hammer Curls",4
