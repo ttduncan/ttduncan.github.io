@@ -225,7 +225,7 @@ function renderHome(workouts) {
   );
 
   appView.appendChild(buildWorkoutCard(selected));
-  addVerseCard();
+addVerseCard();
 }
 
 function renderLibrary(workouts) {
