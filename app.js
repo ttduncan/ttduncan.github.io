@@ -115,30 +115,15 @@ function createElement(tag, className, text) {
 
 function addVerseCard() {
   const card = createElement("article", "workout-card");
-  const title = createElement("h2", "", "Verse of the Day");
-  const verseText = createElement("p", "summary", "Loading verse…");
-  const verseRef = createElement("p", "equipment", "");
+  card.appendChild(createElement("h2", "", "Verse of the Day"));
 
-  card.append(title, verseText, verseRef);
+  const frame = document.createElement("iframe");
+  frame.src = "https://www.biblegateway.com/votd/get/?format=html&version=NKJV";
+  frame.title = "BibleGateway Verse of the Day — NKJV";
+  frame.style.cssText = "width:100%; min-height:220px; border:0;";
+  card.appendChild(frame);
+
   appView.appendChild(card);
-
-  fetch("/api/verse")
-    .then(response => {
-      if (!response.ok) throw new Error("Verse request failed");
-      return response.json();
-    })
-    .then(data => {
-      const item = data[0] || data;
-      const text = item?.text || "Verse unavailable";
-      const ref = item?.reference || item?.passage || "";
-
-      verseText.textContent = `“${text}”`;
-      verseRef.textContent = ref;
-    })
-    .catch(() => {
-      verseText.textContent = "The verse could not be loaded.";
-      verseRef.textContent = "Check your API setup";
-    });
 }
 
 function buildWorkoutCard(workout) {
