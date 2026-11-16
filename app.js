@@ -114,7 +114,7 @@ function createElement(tag, className, text) {
 }
 
 function addVerseCard() {
-  const card = createElement("article", "workout-card");
+  const card = createElement("article", "workout-card verse-card");
   card.appendChild(createElement("h2", "", "Verse of the Day"));
 
   const frame = document.createElement("iframe");
