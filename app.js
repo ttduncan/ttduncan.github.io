@@ -123,20 +123,36 @@ function addVerseCard() {
   appView.appendChild(card);
 
   fetch("https://api.youversion.com/v1/verse-of-the-days/356?language_ranges[]=en")
-    .then(res => res.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Unable to load verse");
+      return response.json();
+    })
     .then(data => {
       const item = data[0];
+      if (!item) throw new Error("No verse returned");
+
       verse.textContent = item.text;
 
       if (item.image_id) {
-        const image = createElement("img");
-        image.src = `https://api.youversion.com/v1/images/${item.image_id}`;
-        image.alt = "Verse of the Day";
-        image.style.maxWidth = "100%";
-        card.appendChild(image);
+        fetch(`https://api.youversion.com/v1/images/${item.image_id}`)
+          .then(response => {
+            if (!response.ok) throw new Error("Unable to load verse image");
+            return response.json();
+          })
+          .then(imageData => {
+            if (imageData.url) {
+              const image = createElement("img");
+              image.src = imageData.url;
+              image.alt = "Verse of the Day";
+              image.style.maxWidth = "100%";
+              card.appendChild(image);
+            }
+          })
+          .catch(error => console.warn("Verse image could not be loaded:", error));
       }
     })
-    .catch(() => {
+    .catch(error => {
+      console.warn("Verse could not be loaded:", error);
       verse.textContent = "The verse could not be loaded.";
     });
 }
@@ -225,6 +241,7 @@ function renderHome(workouts) {
   );
 
   appView.appendChild(buildWorkoutCard(selected));
+  addVerseCard();
 }
 
 function renderLibrary(workouts) {
@@ -248,8 +265,6 @@ function renderLibrary(workouts) {
   });
 
   appView.appendChild(cardList);
-appView.appendChild(buildWorkoutCard(selected));
-addVerseCard();
 }
 
 function setActiveView(view) {
