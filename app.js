@@ -116,44 +116,28 @@ function createElement(tag, className, text) {
 function addVerseCard() {
   const card = createElement("article", "workout-card");
   const title = createElement("h2", "", "Verse of the Day");
-  const verse = createElement("p", "summary", "Loading verse…");
-  const passage = createElement("p", "equipment", "See full passage in Bible App");
+  const verseText = createElement("p", "summary", "Loading verse…");
+  const verseRef = createElement("p", "equipment", "");
 
-  card.append(title, verse, passage);
+  card.append(title, verseText, verseRef);
   appView.appendChild(card);
 
-  fetch("https://api.youversion.com/v1/verse-of-the-days/356?language_ranges[]=en")
+  fetch("/api/verse")
     .then(response => {
-      if (!response.ok) throw new Error("Unable to load verse");
+      if (!response.ok) throw new Error("Verse request failed");
       return response.json();
     })
     .then(data => {
-      const item = data[0];
-      if (!item) throw new Error("No verse returned");
+      const item = data[0] || data;
+      const text = item?.text || "Verse unavailable";
+      const ref = item?.reference || item?.passage || "";
 
-      verse.textContent = item.text;
-
-      if (item.image_id) {
-        fetch(`https://api.youversion.com/v1/images/${item.image_id}`)
-          .then(response => {
-            if (!response.ok) throw new Error("Unable to load verse image");
-            return response.json();
-          })
-          .then(imageData => {
-            if (imageData.url) {
-              const image = createElement("img");
-              image.src = imageData.url;
-              image.alt = "Verse of the Day";
-              image.style.maxWidth = "100%";
-              card.appendChild(image);
-            }
-          })
-          .catch(error => console.warn("Verse image could not be loaded:", error));
-      }
+      verseText.textContent = `“${text}”`;
+      verseRef.textContent = ref;
     })
-    .catch(error => {
-      console.warn("Verse could not be loaded:", error);
-      verse.textContent = "The verse could not be loaded.";
+    .catch(() => {
+      verseText.textContent = "The verse could not be loaded.";
+      verseRef.textContent = "Check your API setup";
     });
 }
 
