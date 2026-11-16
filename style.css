@@ -215,6 +215,11 @@ li {
   letter-spacing: 0.04em;
 }
 
+.verse-card {
+  background: #eaf6ff;
+  border: 1px solid #7dd3fc;
+}
+
 @media (min-width: 640px) {
   .card-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
