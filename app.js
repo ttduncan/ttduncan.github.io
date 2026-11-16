@@ -113,6 +113,34 @@ function createElement(tag, className, text) {
   return element;
 }
 
+function addVerseCard() {
+  const card = createElement("article", "workout-card");
+  const title = createElement("h2", "", "Verse of the Day");
+  const verse = createElement("p", "summary", "Loading verse…");
+  const passage = createElement("p", "equipment", "See full passage in Bible App");
+
+  card.append(title, verse, passage);
+  appView.appendChild(card);
+
+  fetch("https://api.youversion.com/v1/verse-of-the-days/356?language_ranges[]=en")
+    .then(res => res.json())
+    .then(data => {
+      const item = data[0];
+      verse.textContent = item.text;
+
+      if (item.image_id) {
+        const image = createElement("img");
+        image.src = `https://api.youversion.com/v1/images/${item.image_id}`;
+        image.alt = "Verse of the Day";
+        image.style.maxWidth = "100%";
+        card.appendChild(image);
+      }
+    })
+    .catch(() => {
+      verse.textContent = "The verse could not be loaded.";
+    });
+}
+
 function buildWorkoutCard(workout) {
   const card = createElement("article", "workout-card");
 
