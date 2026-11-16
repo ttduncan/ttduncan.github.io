@@ -248,6 +248,8 @@ function renderLibrary(workouts) {
   });
 
   appView.appendChild(cardList);
+appView.appendChild(buildWorkoutCard(selected));
+addVerseCard();
 }
 
 function setActiveView(view) {
