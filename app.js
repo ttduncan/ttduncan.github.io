@@ -120,7 +120,7 @@ function addVerseCard() {
   const frame = document.createElement("iframe");
   frame.src = "https://www.biblegateway.com/votd/get/?format=html&version=NKJV";
   frame.title = "BibleGateway Verse of the Day — NKJV";
-  frame.style.cssText = "width:100%; min-height:220px; border:0;";
+  frame.style.cssText = "width:100%; height:160px; border:0; display:block;";
   card.appendChild(frame);
 
   appView.appendChild(card);
